@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="/style.css">
+  <title>Cursos Online</title>
+</head>
+<body>
+  <h1>Lista de Cursos</h1>
+  <ul>
+    <% cursos.forEach(curso => { %>
+      <li>
+        <h2><%= curso.nome %></h2>
+        <p>Início: <%= curso.inicio %></p>
+        <p>Duração: <%= curso.duracao %></p>
+        <p>Preço: R$ <%= curso.preco %></p>
+        <a href="/detalhes/<%= curso.id %>">Ver detalhes</a>
+      </li>
+    <% }) %>
+  </ul>
+
+  <a href="/logout">Sair</a>
+</body>
+</html>
