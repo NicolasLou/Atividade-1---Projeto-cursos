@@ -5,7 +5,7 @@ const path = require("path");
 const app = express();
 const PORT = 3000;
 
-// Middleware
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(
@@ -16,42 +16,42 @@ app.use(
   })
 );
 
-// Motor de templates EJS
+
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
-// Arquivos estáticos
+
 app.use(express.static(path.join(__dirname, "public")));
 
-// Cursos fake
+
 const cursos = [
   {
     id: 1,
-    nome: "JavaScript para Iniciantes",
+    nome: "Culinaria para Iniciantes",
     inicio: "10/09/2025",
     duracao: "4 semanas",
     preco: 200,
-    descricao: "Aprenda os fundamentos do JavaScript.",
+    descricao: "Aprenda os fundamentos da Culinaria.",
     cargaHoraria: "40h",
-    instrutor: "João Silva",
+    instrutor: "Paula Marques",
     nivel: "Iniciante",
     vagas: 20,
   },
   {
     id: 2,
-    nome: "Node.js Avançado",
+    nome: "Curso de Medicina",
     inicio: "15/09/2025",
     duracao: "6 semanas",
     preco: 400,
-    descricao: "Curso completo sobre Node.js e Express.",
+    descricao: "Curso completo sobre Medicina.",
     cargaHoraria: "60h",
-    instrutor: "Maria Oliveira",
+    instrutor: "Sandra Oliveira",
     nivel: "Avançado",
     vagas: 15,
   },
 ];
 
-// Middleware de autenticação
+
 function autenticar(req, res, next) {
   if (req.session.usuarioAutenticado) {
     next();
@@ -60,7 +60,7 @@ function autenticar(req, res, next) {
   }
 }
 
-// Rotas
+
 app.get("/", (req, res) => {
   res.render("index", { cursos });
 });
