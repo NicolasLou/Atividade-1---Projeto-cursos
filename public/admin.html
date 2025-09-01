@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração de Pacotes</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Painel de Administração</h1>
+    <nav>
+      <a href="index.html">Início</a>
+      <a href="login.html">Login</a>
+    </nav>
+  </header>
+
+  <main>
+    <h2>Gerenciar Crusos</h2>
+
+ 
+    <form id="form-pacote">
+      <input type="hidden" id="pacote-id">
+      <input type="text" id="nome" placeholder="Nome do pacote" required>
+      <textarea id="descricao" placeholder="Descrição"></textarea>
+      <input type="number" step="0.01" id="preco" placeholder="Preço" required>
+      <button type="submit">Salvar</button>
+    </form>
+
+
+    <h3>Pacotes Cadastrados</h3>
+    <table border="1" cellpadding="8">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Preço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="lista-pacotes"></tbody>
+    </table>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
