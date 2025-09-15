@@ -8,11 +8,10 @@ const PORT = 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',       
-  password: '',       
+  user: 'root',
+  password: '',
   database: 'projeto_cursos'
 });
 
@@ -24,6 +23,11 @@ db.connect(err => {
   console.log('Conectado ao MySQL!');
 });
 
+
+
+
+
+
 app.get('/api/pacotes', (req, res) => {
   const sql = 'SELECT * FROM pacotes';
   db.query(sql, (err, results) => {
@@ -32,32 +36,52 @@ app.get('/api/pacotes', (req, res) => {
   });
 });
 
+
+app.get('/api/pacotes/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = 'SELECT * FROM pacotes WHERE id = ?';
+  db.query(sql, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    if (results.length === 0) return res.status(404).json({ mensagem: "Pacote não encontrado" });
+    res.json(results[0]);
+  });
+});
+
+
 app.post('/api/pacotes', (req, res) => {
   const { nome, descricao, preco } = req.body;
   const sql = 'INSERT INTO pacotes (nome, descricao, preco) VALUES (?, ?, ?)';
   db.query(sql, [nome, descricao, preco], (err, result) => {
     if (err) return res.status(500).json({ error: err });
-    res.status(201).json({ id: result.insertId, nome, descricao, preco });
+    res.status(201).json({ mensagem: "Pacote criado com sucesso", id: result.insertId });
   });
 });
+
 
 app.put('/api/pacotes/:id', (req, res) => {
   const { id } = req.params;
   const { nome, descricao, preco } = req.body;
   const sql = 'UPDATE pacotes SET nome = ?, descricao = ?, preco = ? WHERE id = ?';
-  db.query(sql, [nome, descricao, preco, id], (err) => {
+  db.query(sql, [nome, descricao, preco, id], (err, result) => {
     if (err) return res.status(500).json({ error: err });
-    res.json({ id, nome, descricao, preco });
+    if (result.affectedRows === 0) return res.status(404).json({ mensagem: "Pacote não encontrado" });
+    res.json({ mensagem: "Pacote atualizado com sucesso" });
   });
 });
+
 
 app.delete('/api/pacotes/:id', (req, res) => {
   const { id } = req.params;
   const sql = 'DELETE FROM pacotes WHERE id = ?';
-  db.query(sql, [id], (err) => {
+  db.query(sql, [id], (err, result) => {
     if (err) return res.status(500).json({ error: err });
-    res.json({ message: 'Pacote removido com sucesso' });
+    if (result.affectedRows === 0) return res.status(404).json({ mensagem: "Pacote não encontrado" });
+    res.json({ mensagem: "Pacote excluído com sucesso" });
   });
 });
 
-app.listen(PORT, () => console.log(`Servidor rodando em http://localhost:${PORT}`));
+
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
