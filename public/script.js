@@ -1,113 +1,214 @@
-const apiUrl = '/api/pacotes';
+const API_URL = "/api/pacotes";
+const API_PESSOAS = "/api/pessoas"; 
 
 
-async function carregarPacotes() {
-  const res = await fetch(apiUrl);
-  const pacotes = await res.json();
+function mostrarMensagem(tipo, texto) {
+  const messages = document.getElementById("messages");
+  messages.innerHTML = `
+    <div class="alert alert-${tipo}" role="alert">${texto}</div>
+  `;
+  setTimeout(() => messages.innerHTML = "", 3000);
+}
 
-  const lista = document.getElementById('lista-pacotes');
-  if (!lista) return;
+async function fetchJSON(url, options = {}) {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  } catch (err) {
+    console.error("Erro:", err);
+    mostrarMensagem("danger", "Erro ao comunicar com servidor");
+    throw err;
+  }
+}
 
-  lista.innerHTML = '';
 
-  const isTabela = lista.tagName === 'TBODY';
-
+async function carregarPacotesPublico() {
+  if (!document.getElementById("lista-pacotes")) return;
+  const pacotes = await fetchJSON(API_URL);
+  const container = document.getElementById("lista-pacotes");
+  container.innerHTML = "";
   pacotes.forEach(p => {
-    const precoFormatado = parseFloat(p.preco).toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL"
-    });
+    container.innerHTML += `
+      <div class="col-md-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">${p.nome}</h5>
+            <p class="card-text">${p.descricao || ""}</p>
+            <p><strong>R$ ${parseFloat(p.preco).toFixed(2)}</strong></p>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
 
-    if (isTabela) {
-  
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
+
+async function carregarPacotesAdmin() {
+  if (!document.getElementById("tabela-pacotes")) return;
+  const pacotes = await fetchJSON(API_URL);
+  const tabela = document.getElementById("tabela-pacotes");
+  tabela.innerHTML = "";
+  pacotes.forEach(p => {
+    tabela.innerHTML += `
+      <tr>
         <td>${p.id}</td>
         <td>${p.nome}</td>
-        <td>${p.descricao}</td>
-        <td>${precoFormatado}</td>
+        <td>${p.descricao || ""}</td>
+        <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
         <td>
-          <button onclick='editarPacote(${p.id}, ${JSON.stringify(p.nome)}, ${JSON.stringify(p.descricao)}, ${JSON.stringify(p.preco)})'>Editar</button>
-          <button onclick="excluirPacote(${p.id})">Excluir</button>
+          <button class="btn btn-sm btn-warning me-2" onclick="editarPacote(${p.id})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="excluirPacote(${p.id})">Excluir</button>
         </td>
-      `;
-      lista.appendChild(tr);
+      </tr>
+    `;
+  });
+}
+
+async function salvarPacote(e) {
+  e.preventDefault();
+  const id = document.getElementById("pacote-id").value;
+  const nome = document.getElementById("nome").value.trim();
+  const descricao = document.getElementById("descricao").value.trim();
+  const preco = document.getElementById("preco").value;
+
+  if (!nome || !preco) {
+    mostrarMensagem("warning", "Nome e preço são obrigatórios!");
+    return;
+  }
+
+  const pacote = { nome, descricao, preco };
+  try {
+    if (id) {
+      await fetchJSON(`${API_URL}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pacote)
+      });
+      mostrarMensagem("success", "Pacote atualizado com sucesso!");
     } else {
- 
-      const card = document.createElement('div');
-      card.className = 'card linha';
-      card.innerHTML = `
-        <div class="info">
-          <span><strong>Nome:</strong> ${p.nome}</span>
-          <span><strong>Descrição:</strong> ${p.descricao}</span>
-          <span><strong>Preço:</strong> ${precoFormatado}</span>
-        </div>
-        <div class="acoes">
-          <button onclick='editarPacote(${p.id}, ${JSON.stringify(p.nome)}, ${JSON.stringify(p.descricao)}, ${JSON.stringify(p.preco)})'>Editar</button>
-          <button onclick="excluirPacote(${p.id})">Excluir</button>
-        </div>
-      `;
-      lista.appendChild(card);
+      await fetchJSON(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pacote)
+      });
+      mostrarMensagem("success", "Pacote criado com sucesso!");
     }
-  });
+    document.getElementById("pacote-form").reset();
+    document.getElementById("pacote-id").value = "";
+    carregarPacotesAdmin();
+  } catch {}
 }
 
-async function criarPacote(event) {
-  event.preventDefault();
-
-  const nome = document.getElementById('nome').value;
-  const descricao = document.getElementById('descricao').value;
-  const preco = document.getElementById('preco').value;
-
-  await fetch(apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nome, descricao, preco })
-  });
-
-  document.getElementById('form-pacote').reset();
-  carregarPacotes();
+async function editarPacote(id) {
+  const pacote = await fetchJSON(`${API_URL}/${id}`);
+  document.getElementById("pacote-id").value = pacote.id;
+  document.getElementById("nome").value = pacote.nome;
+  document.getElementById("descricao").value = pacote.descricao;
+  document.getElementById("preco").value = pacote.preco;
 }
-
-
-async function editarPacote(id, nome, descricao, preco) {
-  document.getElementById('nome').value = nome;
-  document.getElementById('descricao').value = descricao;
-  document.getElementById('preco').value = preco;
-
-  const form = document.getElementById('form-pacote');
-  form.onsubmit = async (event) => {
-    event.preventDefault();
-    const novoNome = document.getElementById('nome').value;
-    const novaDescricao = document.getElementById('descricao').value;
-    const novoPreco = document.getElementById('preco').value;
-
-    await fetch(`${apiUrl}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome: novoNome, descricao: novaDescricao, preco: novoPreco })
-    });
-
-    form.reset();
-    form.onsubmit = criarPacote; 
-    carregarPacotes();
-  };
-}
-
 
 async function excluirPacote(id) {
-  if (confirm("Tem certeza que deseja excluir este pacote?")) {
-    await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
-    carregarPacotes();
+  if (!confirm("Deseja excluir este pacote?")) return;
+  try {
+    await fetchJSON(`${API_URL}/${id}`, { method: "DELETE" });
+    mostrarMensagem("success", "Pacote excluído com sucesso!");
+    carregarPacotesAdmin();
+  } catch {}
+}
+
+// Pessoas
+async function carregarPessoasAdmin() {
+  if (!document.getElementById("tabela-pessoas")) return;
+  const pessoas = await fetchJSON(API_PESSOAS);
+  const tabela = document.getElementById("tabela-pessoas");
+  tabela.innerHTML = "";
+  pessoas.forEach(p => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.nome}</td>
+        <td>${p.email}</td>
+        <td>${p.telefone || ""}</td>
+        <td>${p.status}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" onclick="editarPessoa(${p.id})">Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="excluirPessoa(${p.id})">Excluir</button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function salvarPessoa(e) {
+  e.preventDefault();
+  const id = document.getElementById("pessoa-id").value;
+  const nome = document.getElementById("pessoa-nome").value.trim();
+  const email = document.getElementById("pessoa-email").value.trim();
+  const telefone = document.getElementById("pessoa-telefone").value.trim();
+  const status = document.getElementById("pessoa-status").value;
+
+  if (!nome || !email) {
+    mostrarMensagem("warning", "Nome e email são obrigatórios!");
+    return;
   }
+
+  const pessoa = { nome, email, telefone, status };
+  try {
+    if (id) {
+      await fetchJSON(`${API_PESSOAS}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pessoa)
+      });
+      mostrarMensagem("success", "Pessoa atualizada com sucesso!");
+    } else {
+      await fetchJSON(API_PESSOAS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(pessoa)
+      });
+      mostrarMensagem("success", "Pessoa criada com sucesso!");
+    }
+    document.getElementById("pessoa-form").reset();
+    document.getElementById("pessoa-id").value = "";
+    carregarPessoasAdmin();
+  } catch {}
+}
+
+async function editarPessoa(id) {
+  const pessoa = await fetchJSON(`${API_PESSOAS}/${id}`);
+  document.getElementById("pessoa-id").value = pessoa.id;
+  document.getElementById("pessoa-nome").value = pessoa.nome;
+  document.getElementById("pessoa-email").value = pessoa.email;
+  document.getElementById("pessoa-telefone").value = pessoa.telefone;
+  document.getElementById("pessoa-status").value = pessoa.status;
+}
+
+async function excluirPessoa(id) {
+  if (!confirm("Deseja excluir esta pessoa?")) return;
+  try {
+    await fetchJSON(`${API_PESSOAS}/${id}`, { method: "DELETE" });
+    mostrarMensagem("success", "Pessoa excluída com sucesso!");
+    carregarPessoasAdmin();
+  } catch {}
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
-  carregarPacotes();
+document.addEventListener("DOMContentLoaded", () => {
+  carregarPacotesPublico();
+  carregarPacotesAdmin();
+  carregarPessoasAdmin();
 
-  const form = document.getElementById('form-pacote');
-  if (form) {
-    form.onsubmit = criarPacote;
-  }
+  const formPacote = document.getElementById("pacote-form");
+  if (formPacote) formPacote.addEventListener("submit", salvarPacote);
+
+  const formPessoa = document.getElementById("pessoa-form");
+  if (formPessoa) formPessoa.addEventListener("submit", salvarPessoa);
+
+
+  setInterval(() => {
+    carregarPacotesAdmin();
+    carregarPessoasAdmin();
+  }, 5000);
 });

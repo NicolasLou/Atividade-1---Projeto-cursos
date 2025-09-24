@@ -3,44 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administração de Pacotes</title>
+  <title>Administração — Pacotes e Pessoas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>Painel de Administração</h1>
-    <nav>
-      <a href="index.html">Início</a>
-      <a href="login.html">Login</a>
-    </nav>
-  </header>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Painel Admin</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
+          <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
 
-  <main>
-    <h2>Gerenciar Crusos</h2>
-
- 
-    <form id="form-pacote">
-      <input type="hidden" id="pacote-id">
-      <input type="text" id="nome" placeholder="Nome do pacote" required>
-      <textarea id="descricao" placeholder="Descrição"></textarea>
-      <input type="number" step="0.01" id="preco" placeholder="Preço" required>
-      <button type="submit">Salvar</button>
-    </form>
+  <main class="container py-4">
+    <div id="messages"></div>
 
 
-    <h3>Pacotes Cadastrados</h3>
-    <table border="1" cellpadding="8">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nome</th>
-          <th>Descrição</th>
-          <th>Preço</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="lista-pacotes"></tbody>
-    </table>
+    <section class="mb-5">
+      <h2 class="mb-3">Cadastrar Novo Pacote</h2>
+      <div class="card mb-4">
+        <div class="card-body">
+          <form id="pacote-form">
+            <input type="hidden" id="pacote-id">
+            <div class="mb-3">
+              <label for="nome" class="form-label">Nome do Pacote</label>
+              <input type="text" id="nome" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="descricao" class="form-label">Descrição</label>
+              <textarea id="descricao" class="form-control"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="preco" class="form-label">Preço</label>
+              <input type="number" id="preco" class="form-control" step="0.01" required>
+            </div>
+            <button type="submit" class="btn btn-success">Salvar Pacote</button>
+            <button type="reset" class="btn btn-secondary">Limpar</button>
+          </form>
+        </div>
+      </div>
+
+      <h3>Pacotes Cadastrados</h3>
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Preço</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-pacotes">
+   
+        </tbody>
+      </table>
+    </section>
+
+
+    <section class="mb-5">
+      <h2 class="mb-3">Cadastrar Nova Pessoa</h2>
+      <div class="card mb-4">
+        <div class="card-body">
+          <form id="pessoa-form">
+            <input type="hidden" id="pessoa-id">
+            <div class="mb-3">
+              <label for="pessoa-nome" class="form-label">Nome</label>
+              <input type="text" id="pessoa-nome" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="pessoa-email" class="form-label">Email</label>
+              <input type="email" id="pessoa-email" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="pessoa-telefone" class="form-label">Telefone</label>
+              <input type="text" id="pessoa-telefone" class="form-control">
+            </div>
+            <div class="mb-3">
+              <label for="pessoa-status" class="form-label">Status</label>
+              <select id="pessoa-status" class="form-select">
+                <option value="ativo" selected>Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-success">Salvar Pessoa</button>
+            <button type="reset" class="btn btn-secondary">Limpar</button>
+          </form>
+        </div>
+      </div>
+
+      <h3>Pessoas Cadastradas</h3>
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tabela-pessoas">
+         
+        </tbody>
+      </table>
+    </section>
   </main>
 
   <script src="script.js"></script>

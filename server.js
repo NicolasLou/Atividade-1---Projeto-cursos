@@ -24,56 +24,40 @@ db.connect(err => {
 });
 
 
-
-
-
-
 app.get('/api/pacotes', (req, res) => {
-  const sql = 'SELECT * FROM pacotes';
-  db.query(sql, (err, results) => {
+  db.query('SELECT * FROM pacotes', (err, results) => {
     if (err) return res.status(500).json({ error: err });
     res.json(results);
   });
 });
 
-
 app.get('/api/pacotes/:id', (req, res) => {
-  const { id } = req.params;
-  const sql = 'SELECT * FROM pacotes WHERE id = ?';
-  db.query(sql, [id], (err, results) => {
+  db.query('SELECT * FROM pacotes WHERE id = ?', [req.params.id], (err, results) => {
     if (err) return res.status(500).json({ error: err });
     if (results.length === 0) return res.status(404).json({ mensagem: "Pacote não encontrado" });
     res.json(results[0]);
   });
 });
 
-
 app.post('/api/pacotes', (req, res) => {
   const { nome, descricao, preco } = req.body;
-  const sql = 'INSERT INTO pacotes (nome, descricao, preco) VALUES (?, ?, ?)';
-  db.query(sql, [nome, descricao, preco], (err, result) => {
+  db.query('INSERT INTO pacotes (nome, descricao, preco) VALUES (?, ?, ?)', [nome, descricao, preco], (err, result) => {
     if (err) return res.status(500).json({ error: err });
     res.status(201).json({ mensagem: "Pacote criado com sucesso", id: result.insertId });
   });
 });
 
-
 app.put('/api/pacotes/:id', (req, res) => {
-  const { id } = req.params;
   const { nome, descricao, preco } = req.body;
-  const sql = 'UPDATE pacotes SET nome = ?, descricao = ?, preco = ? WHERE id = ?';
-  db.query(sql, [nome, descricao, preco, id], (err, result) => {
+  db.query('UPDATE pacotes SET nome = ?, descricao = ?, preco = ? WHERE id = ?', [nome, descricao, preco, req.params.id], (err, result) => {
     if (err) return res.status(500).json({ error: err });
     if (result.affectedRows === 0) return res.status(404).json({ mensagem: "Pacote não encontrado" });
     res.json({ mensagem: "Pacote atualizado com sucesso" });
   });
 });
 
-
 app.delete('/api/pacotes/:id', (req, res) => {
-  const { id } = req.params;
-  const sql = 'DELETE FROM pacotes WHERE id = ?';
-  db.query(sql, [id], (err, result) => {
+  db.query('DELETE FROM pacotes WHERE id = ?', [req.params.id], (err, result) => {
     if (err) return res.status(500).json({ error: err });
     if (result.affectedRows === 0) return res.status(404).json({ mensagem: "Pacote não encontrado" });
     res.json({ mensagem: "Pacote excluído com sucesso" });
@@ -81,6 +65,45 @@ app.delete('/api/pacotes/:id', (req, res) => {
 });
 
 
+app.get('/api/pessoas', (req, res) => {
+  db.query('SELECT * FROM pessoas', (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    res.json(results);
+  });
+});
+
+app.get('/api/pessoas/:id', (req, res) => {
+  db.query('SELECT * FROM pessoas WHERE id = ?', [req.params.id], (err, results) => {
+    if (err) return res.status(500).json({ error: err });
+    if (results.length === 0) return res.status(404).json({ mensagem: "Pessoa não encontrada" });
+    res.json(results[0]);
+  });
+});
+
+app.post('/api/pessoas', (req, res) => {
+  const { nome, email, telefone, status } = req.body;
+  db.query('INSERT INTO pessoas (nome, email, telefone, status) VALUES (?, ?, ?, ?)', [nome, email, telefone, status], (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    res.status(201).json({ mensagem: "Pessoa criada com sucesso", id: result.insertId });
+  });
+});
+
+app.put('/api/pessoas/:id', (req, res) => {
+  const { nome, email, telefone, status } = req.body;
+  db.query('UPDATE pessoas SET nome = ?, email = ?, telefone = ?, status = ? WHERE id = ?', [nome, email, telefone, status, req.params.id], (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    if (result.affectedRows === 0) return res.status(404).json({ mensagem: "Pessoa não encontrada" });
+    res.json({ mensagem: "Pessoa atualizada com sucesso" });
+  });
+});
+
+app.delete('/api/pessoas/:id', (req, res) => {
+  db.query('DELETE FROM pessoas WHERE id = ?', [req.params.id], (err, result) => {
+    if (err) return res.status(500).json({ error: err });
+    if (result.affectedRows === 0) return res.status(404).json({ mensagem: "Pessoa não encontrada" });
+    res.json({ mensagem: "Pessoa excluída com sucesso" });
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
